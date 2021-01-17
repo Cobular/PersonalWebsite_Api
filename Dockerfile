@@ -3,10 +3,10 @@ FROM node:14.15.4-slim
 RUN mkdir /app
 WORKDIR /app
 
-COPY ./package.json ./
+COPY ./package.json ./package-lock.json ./tsconfig.json ./
 RUN npm i && npm install pm2 -g
 
-COPY ./src .
+COPY ./src ./src
 
 RUN npm run build
 

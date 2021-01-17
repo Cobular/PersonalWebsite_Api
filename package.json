@@ -1,6 +1,9 @@
 {
   "name": "personal-website-api-ts",
   "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/JakeCover/PersonalWebsite_Api"
+  },
   "dependencies": {
     "@types/express": "^4.17.11",
     "@types/node": "^14.14.21",
