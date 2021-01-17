@@ -1,0 +1,9 @@
+{
+  "keys": {
+    "lastfm": {
+      "key": "lastfm_key",
+      "secret": "lastfm_secret",
+      "username": "lastfm_username"
+    }
+  }
+}
