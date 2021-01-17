@@ -1,5 +1,7 @@
 import express from "express"
 import LastFM from "lastfm"
+import cors from "cors"
+
 
 interface LastFmData {
   name: string,
@@ -8,6 +10,7 @@ interface LastFmData {
 }
 
 const app = express()
+app.use(cors({origin: false}))
 const port = 3000
 const api_root = "http://ws.audioscrobbler.com/2.0"
 let nowPlayingSong: LastFmData = {
@@ -67,8 +70,10 @@ function getMyData() {
   }
 }
 
-app.get("/", (req, res) => {
-  res.setHeader("Content-Type", "text/json")
+app.get("/",(req, res) => {
+  res.setHeader("Content-Type", "application/json")
+  res.setHeader("Access-Control-Allow-Origin", "*")
+  res.setHeader("Access-Control-Allow-Methods", "GET")
   res.json(getMyData())
 })
 
