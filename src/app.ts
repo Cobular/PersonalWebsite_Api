@@ -6,7 +6,8 @@ import cors from "cors"
 interface LastFmData {
   name: string,
   artist: string,
-  thumb: string
+  thumb: string,
+  url: string
 }
 
 const app = express()
@@ -16,7 +17,8 @@ const api_root = "http://ws.audioscrobbler.com/2.0"
 let nowPlayingSong: LastFmData = {
   name: undefined,
   artist: undefined,
-  thumb: undefined
+  thumb: undefined,
+  url: undefined
 }
 
 let config = process.env.CONFIG ? JSON.parse(process.env.CONFIG) : require("../dist/config.json")
@@ -38,7 +40,8 @@ lastFmStream.on("stoppedPlaying", function(track) {
   nowPlayingSong = {
     name: undefined,
     artist: undefined,
-    thumb: undefined
+    thumb: undefined,
+    url: undefined
   }
 })
 
@@ -50,6 +53,7 @@ function nowPlaying() {
       artist: nowPlayingSong.artist["#text"],
       // image: nowPlayingSong.image[nowPlayingSong.image.length - 1]["#text"] || "http://a5.mzstatic.com/us/r30/Purple3/v4/54/24/28/54242884-8dd5-83cb-1996-4a21295955de/icon175x175.png",
       playing: true,
+      url: nowPlayingSong.url
     }
   } else {
     return {
@@ -57,6 +61,7 @@ function nowPlaying() {
       artist: "Nobody",
       // image: "http://a5.mzstatic.com/us/r30/Purple3/v4/54/24/28/54242884-8dd5-83cb-1996-4a21295955de/icon175x175.png",
       playing: false,
+      url: ""
     }
   }
 }
