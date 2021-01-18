@@ -4,6 +4,9 @@
       "key": "lastfm_key",
       "secret": "lastfm_secret",
       "username": "lastfm_username"
+    },
+    "activity": {
+      "secret_key": "activity_secret_key"
     }
   }
 }

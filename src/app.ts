@@ -1,24 +1,23 @@
 import express from "express"
 import LastFM from "lastfm"
 import cors from "cors"
+import bodyParser from "body-parser"
+import { ActivityData, ActivityType, LastFmData } from "./types"
+import { getMyData, handleActivity, nowPlaying } from "./helper_funcs"
 
-
-interface LastFmData {
-  name: string,
-  artist: string,
-  thumb: string,
-  url: string
-}
-
-const app = express()
-app.use(cors({origin: false}))
+export const app = express()
+app.use(cors({ origin: false }))
 const port = 3000
-const api_root = "http://ws.audioscrobbler.com/2.0"
-let nowPlayingSong: LastFmData = {
+
+let lastFmData: LastFmData = {
   name: undefined,
   artist: undefined,
   thumb: undefined,
-  url: undefined
+  url: undefined,
+}
+let activityData: ActivityData = {
+  time: new Date().getTime(),
+  activity: ActivityType.Unknown,
 }
 
 let config = process.env.CONFIG ? JSON.parse(process.env.CONFIG) : require("../dist/config.json")
@@ -33,53 +32,28 @@ const lastFmStream = lastfm.stream(config.keys.lastfm.username)
 lastFmStream.start()
 
 lastFmStream.on("nowPlaying", function(track: LastFmData) {
-  nowPlayingSong = track
+  lastFmData = track
 })
 
-lastFmStream.on("stoppedPlaying", function(track) {
-  nowPlayingSong = {
+lastFmStream.on("stoppedPlaying", function() {
+  lastFmData = {
     name: undefined,
     artist: undefined,
     thumb: undefined,
-    url: undefined
+    url: undefined,
   }
 })
 
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
-function nowPlaying() {
-  if (nowPlayingSong.name) {
-    return {
-      track: nowPlayingSong.name,
-      artist: nowPlayingSong.artist["#text"],
-      // image: nowPlayingSong.image[nowPlayingSong.image.length - 1]["#text"] || "http://a5.mzstatic.com/us/r30/Purple3/v4/54/24/28/54242884-8dd5-83cb-1996-4a21295955de/icon175x175.png",
-      playing: true,
-      url: nowPlayingSong.url
-    }
-  } else {
-    return {
-      track: "Nothing",
-      artist: "Nobody",
-      // image: "http://a5.mzstatic.com/us/r30/Purple3/v4/54/24/28/54242884-8dd5-83cb-1996-4a21295955de/icon175x175.png",
-      playing: false,
-      url: ""
-    }
-  }
-}
+app.post("/activity", handleActivity(activityData, config))
 
-function getMyData() {
-  return {
-    introduction: "Welcome to my site! It seems like you've found my API. Right now, there's not much here, but I " +
-      "plan to add more stuff soon :tm:. Anyway, shoot me an email at me@cobular.com to say hi if ya want. Have fun " +
-      "looking around here!",
-    lastfm: nowPlaying(),
-  }
-}
-
-app.get("/",(req, res) => {
+app.get("/", (req, res) => {
   res.setHeader("Content-Type", "application/json")
   res.setHeader("Access-Control-Allow-Origin", "*")
   res.setHeader("Access-Control-Allow-Methods", "GET")
-  res.json(getMyData())
+  res.json(getMyData(lastFmData, activityData))
 })
 
 app.listen(port, () => {
