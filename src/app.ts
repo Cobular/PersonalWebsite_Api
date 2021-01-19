@@ -3,11 +3,11 @@ import LastFM from "lastfm"
 import cors from "cors"
 import bodyParser from "body-parser"
 import { ActivityData, ActivityType, LastFmData } from "./types"
-import { getMyData, handleActivity, nowPlaying } from "./helper_funcs"
+import { choose, getMyData, nowPlaying } from "./helper_funcs"
 
 export const app = express()
 app.use(cors({ origin: false }))
-const port = 3000
+const port = 3002
 
 let lastFmData: LastFmData = {
   name: undefined,
@@ -47,7 +47,47 @@ lastFmStream.on("stoppedPlaying", function() {
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-app.post("/activity", handleActivity(activityData, config))
+app.post("/activity", (req, res) => {
+  if (!("secret_key" in req.query) && req.query.secret_key !== config.keys.activity.secret_key) {
+    res.status(401)
+    res.send("Unauthorized")
+  }
+  let activity = ActivityType.Unknown
+  switch (req.query.activity) {
+    case "Game":
+      activity = ActivityType.Game
+      break
+    case "Sleep":
+      activity = ActivityType.Sleep
+      break
+    case "Homework":
+      activity = ActivityType.Homework
+      break
+    case "Lecture":
+      activity = ActivityType.Lecture
+      break
+    case "Programming":
+      activity = ActivityType.Programming
+      break
+    case "Relaxing":
+      activity = ActivityType.Relaxing
+      break
+  }
+  if ("alt_text" in req.query) {
+    activityData = {
+      activity: activity,
+      time: new Date().getTime(),
+      altText: req.query.alt_text as string,
+    }
+  } else {
+    activityData = {
+      activity: activity,
+      time: new Date().getTime(),
+    }
+  }
+  res.status(200)
+  res.send(choose(["pog", "a-ok!", "yee haw", "ok", "cool", "gottcha", "seen", "ack"]))
+})
 
 app.get("/", (req, res) => {
   res.setHeader("Content-Type", "application/json")
